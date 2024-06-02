@@ -8,8 +8,13 @@ KEYPOINTS_DIR=$script_dir/data/keypoints
 OPENPOSE_IMAGES_DIR=$script_dir/data/openpose_images
 mkdir -p $KEYPOINTS_DIR $OPENPOSE_IMAGES_DIR
 
+openpose=build/examples/openpose/openpose.bin 
+if [ ! -e openpose/$openpose ]; then
+    bash $script_dir/setup_openpose.sh
+fi
+
 pushd openpose
-./build/examples/openpose/openpose.bin \
+./$openpose \
     --image_dir $INPUT_DIR \
     --write_json $KEYPOINTS_DIR \
      --write_images $OPENPOSE_IMAGES_DIR \
