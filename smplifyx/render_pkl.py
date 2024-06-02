@@ -24,7 +24,6 @@ import torch
 import smplx
 
 from cmd_parser import parse_config
-from human_body_prior.tools.model_loader import load_vposer
 
 from utils import JointMapper
 import pyrender
@@ -53,7 +52,7 @@ if __name__ == '__main__':
     model_params = dict(model_path=args.get('model_folder'),
                         #  joint_mapper=joint_mapper,
                         create_global_orient=True,
-                        create_body_pose=not args.get('use_vposer'),
+                        create_body_pose=True,
                         create_betas=True,
                         create_left_hand_pose=True,
                         create_right_hand_pose=True,
@@ -69,32 +68,15 @@ if __name__ == '__main__':
     model = model.to(device=device)
 
     batch_size = args.get('batch_size', 1)
-    use_vposer = args.get('use_vposer', True)
-    vposer, pose_embedding = [None, ] * 2
-    vposer_ckpt = args.get('vposer_ckpt', '')
-    if use_vposer:
-        pose_embedding = torch.zeros([batch_size, 32],
-                                     dtype=dtype, device=device,
-                                     requires_grad=True)
-
-        vposer_ckpt = osp.expandvars(vposer_ckpt)
-        vposer, _ = load_vposer(vposer_ckpt, vp_model='snapshot')
-        vposer = vposer.to(device=device)
-        vposer.eval()
 
     for pkl_path in pkl_paths:
         with open(pkl_path, 'rb') as f:
             data = pickle.load(f, encoding='latin1')
-        if use_vposer:
-            with torch.no_grad():
-                pose_embedding[:] = torch.tensor(
-                    data['body_pose'], device=device, dtype=dtype)
 
         est_params = {}
         for key, val in data.items():
-            if key == 'body_pose' and use_vposer:
-                body_pose = vposer.decode(
-                    pose_embedding, output_type='aa').view(1, -1)
+            if key == 'body_pose':
+                body_pose = torch.tensor(val, dtype=dtype, device=device)
                 if model_type == 'smpl':
                     wrist_pose = torch.zeros([body_pose.shape[0], 6],
                                              dtype=body_pose.dtype,

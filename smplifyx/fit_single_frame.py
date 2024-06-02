@@ -476,7 +476,8 @@ def fit_single_frame(img,
             result.update({key: val.detach().cpu().numpy()
                            for key, val in body_model.named_parameters()})
             if use_vposer:
-                result['body_pose'] = pose_embedding.detach().cpu().numpy()
+                body_pose = (vposer.decode(pose_embedding).get('pose_body')).reshape(1, -1)
+                result['body_pose'] = body_pose.detach().cpu().numpy()
 
             results.append({'loss': final_loss_val,
                             'result': result})
