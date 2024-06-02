@@ -62,6 +62,24 @@ if not exists(project_name):
 Colab Code: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1OoGEg8doFA3-3f_5XkA895C9xR9nf-ob?usp=sharing)  
 > You may use V100 or A100 GPU.
 
+### Local env
+#### Openpose
+put your source images to `data/images` and run commands below
+```
+docker build . -t openpose
+docker run -it --rm --gpus all -v `pwd`:/app -w /app openpose bash /app/run_openpose.sh
+```
+
+#### Smplify-x
+1. put smpl-x models (unzip results of dependency no.1 on above image) to under `smplx_models` directory
+2. put vposer models (unzip results of dependency no.2 on above image) to under `vposer` directory
+3. confirm openpose keypoints are generated in `data/keypoints`
+4. run commands below
+```
+bash setup_smplifyx.sh
+bash run_smplifyx.sh
+```
+
 ## GuideLine
 **0. If you get a warning about restarting the kernel, ignore it and click Cancel.**
   
